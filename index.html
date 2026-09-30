@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Jacks Win Logic 🃏</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d1420">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#0d1420;color:#e8e4d8;font-family:system-ui,-apple-system,sans-serif;max-width:520px;margin:0 auto;min-height:100vh}
+header{padding:14px 16px 8px;text-align:center}
+header h1{margin:0;font-size:22px}
+header p{margin:4px 0 0;color:#9aa3b2;font-size:12px}
+.tabs{display:flex;gap:6px;padding:10px 12px;position:sticky;top:0;background:#0d1420;z-index:5}
+.tabs button{flex:1;padding:10px 4px;border:0;border-radius:10px;background:#1a2334;color:#9aa3b2;font-size:13px;font-weight:700;cursor:pointer}
+.tabs button.on{background:#c9a227;color:#14100a}
+main{padding:4px 12px 40px}
+.card{background:#141c2e;border-radius:14px;padding:14px;margin:10px 0}
+.card h3{margin:0 0 10px;font-size:14px;color:#c9a227}
+.suitrow{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.suitlab{font-size:18px;width:22px;text-align:center;flex:none}
+.cgrid{flex:1;display:grid;grid-template-columns:repeat(13,1fr);gap:3px}
+.pcard{background:#f5f0e6;color:#1a2230;border:2px solid transparent;border-radius:6px;font-weight:800;font-size:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;padding:3px 0;line-height:1.15;min-height:34px}
+.pcard.red{color:#c0392b}
+.pcard .s{font-size:11px}
+.pcard.sel{border-color:#c9a227;box-shadow:0 0 6px #c9a227aa}
+.pcard .ord{position:absolute;top:0;right:2px;font-size:8px;color:#8a6d1c;font-weight:900}
+#tray{display:flex;gap:8px;margin:10px 0}
+.slot{flex:1;aspect-ratio:.72;border:2px dashed #3a4a63;background:#0d1420;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#5a6578;font-size:11px}
+.slot.filled{border:2px solid #c9a227;background:#f5f0e6;color:#1a2230;cursor:pointer}
+.slot.filled.red{color:#c0392b}
+.slot b{font-size:20px}.slot span{font-size:16px}
+.btnrow{display:flex;gap:8px}
+.btn{flex:1;padding:11px;border:0;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;background:#2a3a55;color:#e8e4d8}
+.btn.gold{background:#c9a227;color:#14100a}
+.btn.win{background:#1e7a3c;color:#fff}
+.btn.lose{background:#a33327;color:#fff}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chip{padding:8px 12px;border-radius:20px;border:2px solid #3a4a63;background:transparent;color:#9aa3b2;font-weight:700;font-size:13px;cursor:pointer}
+.chip.on{border-color:#c9a227;color:#c9a227;background:#c9a22718}
+.coins{display:flex;align-items:center;gap:10px}
+.coins button{width:38px;height:38px;border-radius:50%;border:2px solid #c9a227;background:transparent;color:#c9a227;font-size:18px;font-weight:900;cursor:pointer}
+.coins b{font-size:18px;min-width:90px;text-align:center}
+.note{font-size:11px;color:#9aa3b2;margin:8px 0 0;line-height:1.5}
+.computing{text-align:center;padding:24px;color:#c9a227;font-weight:700}
+.reshead{font-size:17px;font-weight:900;color:#7bff9e;margin-bottom:10px}
+.bcards{display:flex;gap:8px;justify-content:center;margin:6px 0 12px}
+.bcard{width:58px;aspect-ratio:.68;background:#f5f0e6;color:#1a2230;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;border:3px solid transparent}
+.bcard.red{color:#c0392b}
+.bcard b{font-size:24px}.bcard span{font-size:20px}
+.bcard.held{border-color:#c9a227;box-shadow:0 0 12px #c9a227cc}
+.bcard.drop{opacity:.32;filter:grayscale(.8)}
+.bcard i{position:absolute;top:2px;right:4px;font-style:normal;font-size:14px;color:#a33327;opacity:1}
+.evrow{display:flex;gap:8px;margin:8px 0}
+.evrow div{flex:1;background:#0d1420;border-radius:10px;padding:8px;text-align:center}
+.evrow small{display:block;color:#9aa3b2;font-size:10px}
+.evrow b{font-size:17px;color:#c9a227}
+.why{font-size:13px;line-height:1.55;color:#d8d4c8;background:#0d1420;border-radius:10px;padding:10px}
+.alts{margin-top:10px}
+.altstitle{font-size:12px;color:#9aa3b2;margin-bottom:6px}
+.alt{display:flex;justify-content:space-between;font-size:12px;padding:7px 10px;background:#0d1420;border-radius:8px;margin-bottom:5px}
+.alt b{color:#c9a227}
+.logrow{display:flex;gap:8px;align-items:center;margin-top:12px}
+.logrow span{font-size:13px;color:#9aa3b2}
+.ms{display:block;text-align:center;color:#5a6578;font-size:10px;margin-top:10px}
+table.pay{width:100%;border-collapse:collapse;font-size:11px}
+table.pay th,table.pay td{padding:6px 4px;text-align:center;border-bottom:1px solid #2a3a55}
+table.pay th{color:#c9a227;font-size:10px}
+table.pay td:first-child,table.pay th:first-child{text-align:left}
+.histstats{display:flex;gap:8px;margin-bottom:10px}
+.histstats div{flex:1;background:#0d1420;border-radius:10px;padding:10px;text-align:center}
+.histstats small{display:block;color:#9aa3b2;font-size:10px}
+.histstats b{font-size:19px;color:#c9a227}
+.dots{display:flex;gap:4px;flex-wrap:wrap}
+.dot{width:16px;height:16px;border-radius:50%}
+.dot.w{background:#2ecc71}.dot.l{background:#e74c3c}
+.info h4{color:#c9a227;margin:14px 0 6px;font-size:14px}
+.info p,.info li{font-size:13px;line-height:1.6;color:#c9c5b8}
+.info ul{padding-left:18px;margin:6px 0}
+.warn{background:#3a2410;border:1px solid #c9a22755;border-radius:10px;padding:10px;font-size:12px;line-height:1.6;color:#e8cf9a}
+</style>
+</head>
+<body>
+<header>
+  <h1>🃏 Jacks Win Logic</h1>
+  <p>Engine video poker Jacks or Better — exact EV, bukan tebakan</p>
+</header>
+<nav class="tabs">
+  <button data-t="main" class="on">🃏 Main</button>
+  <button data-t="pay">💰 Bayaran</button>
+  <button data-t="hist">📊 Riwayat</button>
+  <button data-t="info">ℹ️ Info</button>
+</nav>
+<main>
+  <section id="t-main">
+    <div class="card">
+      <h3>🃏 Kartu kamu — tap 5 kartu</h3>
+      <div id="picker"></div>
+      <div id="tray"></div>
+      <div class="btnrow">
+        <button class="btn" id="bRandom">🎲 Acak</button>
+        <button class="btn" id="bReset">✖ Reset</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>💰 Paytable & bet</h3>
+      <div class="chips" id="ptchips"></div>
+      <div class="coins">
+        <button id="cMin">−</button><b><span id="cVal">5</span> koin</b><button id="cPlus">+</button>
+      </div>
+      <p class="note">⚠️ Selalu bet <b>5 koin</b>: Royal Flush dibayar <b>800</b> (bukan 250×5 = 1250, tapi jauh lebih besar dari 250). Bet kecil = RTP turun.</p>
+    </div>
+    <div class="card" id="resultCard" style="display:none">
+      <h3>🎯 Rekomendasi engine</h3>
+      <div id="result"></div>
+    </div>
+  </section>
+  <section id="t-pay" hidden>
+    <div class="card">
+      <h3>💰 Tabel bayaran (per 1 koin)</h3>
+      <table class="pay">
+        <tr><th>Tangan</th><th>9/6</th><th>9/5</th><th>8/6</th><th>8/5</th><th>7/5</th></tr>
+        <tr><td>Royal Flush</td><td colspan="5">250 <small>(800 @ 5 koin)</small></td></tr>
+        <tr><td>Straight Flush</td><td colspan="5">50</td></tr>
+        <tr><td>Four of a Kind</td><td colspan="5">25</td></tr>
+        <tr><td>Full House</td><td>9</td><td>9</td><td>8</td><td>8</td><td>7</td></tr>
+        <tr><td>Flush</td><td>6</td><td>5</td><td>6</td><td>5</td><td>5</td></tr>
+        <tr><td>Straight</td><td colspan="5">4</td></tr>
+        <tr><td>Three of a Kind</td><td colspan="5">3</td></tr>
+        <tr><td>Two Pair</td><td colspan="5">2</td></tr>
+        <tr><td>Jacks or Better</td><td colspan="5">1</td></tr>
+      </table>
+      <p class="note">Nama varian = bayaran Full House / Flush. "9/6 Full Pay" RTP optimalnya ±99.54% — varian lain lebih kecil. Cek tabel di mesinmu sebelum main, lalu pilih yang cocok di tab Main.</p>
+    </div>
+  </section>
+  <section id="t-hist" hidden>
+    <div class="card">
+      <h3>📊 Rasio hasil</h3>
+      <div id="hist"></div>
+      <div class="btnrow" style="margin-top:10px">
+        <button class="btn" id="hReset">🗑 Hapus riwayat</button>
+      </div>
+    </div>
+  </section>
+  <section id="t-info" hidden>
+    <div class="card info">
+      <h3>ℹ️ Cara main video poker</h3>
+      <h4>Aturan singkat</h4>
+      <ul>
+        <li>Dapat 5 kartu → pilih mana yang <b>ditahan</b>, sisanya dibuang & diganti sekali.</li>
+        <li>Tangan akhir dibayar sesuai tabel. Pair di bawah Jack (10 ke bawah) = zonk.</li>
+        <li><b>Selalu bet maksimal (5 koin)</b> — bonus Royal 800 hanya di bet max.</li>
+      </ul>
+      <h4>Cara kerja engine</h4>
+      <p>Untuk tiap 32 opsi tahan/buang, engine menghitung <b>expected value EXACT</b> dengan enumerasi semua kemungkinan draw dari 47 sisa kartu (±1 juta evaluasi per analisis). Opsi dengan EV tertinggi = strategi optimal matematis. Bukan pola, bukan feeling.</p>
+      <h4>Contoh keputusan klasik</h4>
+      <ul>
+        <li>Pair kecil + 4 kartu flush → <b>tahan flush</b> (EV 1.21 vs 0.82)</li>
+        <li>Pair Jack + 4 kartu flush → <b>tahan pair</b> (EV 1.54 vs 1.21)</li>
+        <li>Two Pair → <b>tahan 4 kartu</b>, buang 1 (kejar Full House, EV 2.60)</li>
+        <li>4 kartu Royal → <b>selalu tahan</b>, bahkan lepas Straight/Flush jadi</li>
+      </ul>
+      <div class="warn">⚠️ <b>Jujur dulu, Bos:</b> Jacks or Better 9/6 yang dimainkan SEMPURNA pun RTP-nya ±99.54% — masih di bawah 100%. Engine ini bikin kamu kalah <b>pelan</b>, bukan menang. Jangan kejar kekalahan, tentukan batas sebelum main.</div>
+    </div>
+  </section>
+</main>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}</script>
+</body>
+</html>
