@@ -43,6 +43,17 @@ main{padding:4px 12px 40px}
 .coins button{width:38px;height:38px;border-radius:50%;border:2px solid #c9a227;background:transparent;color:#c9a227;font-size:18px;font-weight:900;cursor:pointer}
 .coins b{font-size:18px;min-width:90px;text-align:center}
 .note{font-size:11px;color:#9aa3b2;margin:8px 0 0;line-height:1.5}
+.nomrow{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.nomrow>span{font-size:13px;color:#9aa3b2}
+.nominput{display:flex;align-items:center;gap:6px;background:#0d1420;border:2px solid #3a4a63;border-radius:10px;padding:8px 12px}
+.nominput span{color:#c9a227;font-weight:800;font-size:14px}
+.nominput input{background:transparent;border:0;color:#e8e4d8;font-size:16px;font-weight:800;width:120px;text-align:right;outline:none}
+#nomchips{margin-top:8px}
+.exprp{background:#c9a22718;border:1px solid #c9a22755;border-radius:10px;padding:10px;text-align:center;font-size:14px;margin:8px 0}
+.exprp b{color:#c9a227;font-size:18px}
+.exprp small{color:#9aa3b2;display:block;margin-top:2px;font-size:11px}
+.payrp{margin-top:10px;font-size:12px;line-height:1.8;background:#0d1420;border-radius:10px;padding:10px}
+.payrp b{color:#c9a227}
 .computing{text-align:center;padding:24px;color:#c9a227;font-weight:700}
 .reshead{font-size:17px;font-weight:900;color:#7bff9e;margin-bottom:10px}
 .bcards{display:flex;gap:8px;justify-content:center;margin:6px 0 12px}
@@ -109,7 +120,9 @@ table.pay td:first-child,table.pay th:first-child{text-align:left}
       <div class="coins">
         <button id="cMin">−</button><b><span id="cVal">5</span> koin</b><button id="cPlus">+</button>
       </div>
-      <p class="note">⚠️ Selalu bet <b>5 koin</b>: Royal Flush dibayar <b>800</b> (bukan 250×5 = 1250, tapi jauh lebih besar dari 250). Bet kecil = RTP turun.</p>
+      <div class="nomrow"><span>Nilai 1 koin</span><div class="nominput"><span>Rp</span><input id="nominal" type="number" min="100" step="100" value="1000"></div></div>
+      <div class="chips" id="nomchips"></div>
+      <p class="note">⚠️ Selalu bet <b>5 koin</b>: Royal Flush dibayar <b>800</b> (bukan 250). Total bet = koin × nilai koin.</p>
     </div>
     <div class="card" id="resultCard" style="display:none">
       <h3>🎯 Rekomendasi engine</h3>
@@ -132,6 +145,7 @@ table.pay td:first-child,table.pay th:first-child{text-align:left}
         <tr><td>Jacks or Better</td><td colspan="5">1</td></tr>
       </table>
       <p class="note">Nama varian = bayaran Full House / Flush. "9/6 Full Pay" RTP optimalnya ±99.54% — varian lain lebih kecil. Cek tabel di mesinmu sebelum main, lalu pilih yang cocok di tab Main.</p>
+      <div class="payrp" id="payRp"></div>
     </div>
   </section>
   <section id="t-hist" hidden>

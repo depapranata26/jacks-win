@@ -4,9 +4,25 @@
   var E = window.JacksEngine;
   var RANK_CHARS = '23456789TJQKA', SUIT_CHARS = ['♠', '♥', '♦', '♣'];
   var PTS = ['9/6', '9/5', '8/6', '8/5', '7/5'];
-  var picked = [], PT = '9/6', COINS = 5;
+  var picked = [], PT = '9/6', COINS = 5, NOMINAL = 1000;
 
   function $(id) { return document.getElementById(id); }
+  function fmtRp(x) { return 'Rp ' + Math.round(x).toLocaleString('id-ID'); }
+
+  // ---------- config tersimpan ----------
+  var CFGKEY = 'jacks_cfg_v1';
+  function loadCfg() {
+    try {
+      var c = JSON.parse(localStorage.getItem(CFGKEY)) || {};
+      if (E.PAYTABLES[c.pt]) PT = c.pt;
+      if (c.coins >= 1 && c.coins <= 5) COINS = c.coins;
+      if (c.nominal >= 100) NOMINAL = c.nominal;
+    } catch (e) {}
+  }
+  function saveCfg() {
+    try { localStorage.setItem(CFGKEY, JSON.stringify({ pt: PT, coins: COINS, nominal: NOMINAL })); } catch (e) {}
+  }
+  loadCfg();
 
   // ---------- tabs ----------
   document.querySelectorAll('.tabs button').forEach(function (b) {
@@ -17,6 +33,7 @@
         $('t-' + t).hidden = (t !== b.dataset.t);
       });
       if (b.dataset.t === 'hist') renderHist();
+      if (b.dataset.t === 'pay') renderPayRp();
     };
   });
 
@@ -95,16 +112,38 @@
       b.className = 'chip' + (p === PT ? ' on' : '');
       b.textContent = p + (p === '9/6' ? ' ★' : '');
       b.onclick = function () {
-        PT = p;
+        PT = p; saveCfg();
         w.querySelectorAll('.chip').forEach(function (x) { x.classList.remove('on'); });
         b.classList.add('on');
+        renderPayRp();
         if (picked.length === 5) analyze();
       };
       w.appendChild(b);
     });
   }
-  $('cMin').onclick = function () { if (COINS > 1) { COINS--; $('cVal').textContent = COINS; if (picked.length === 5) analyze(); } };
-  $('cPlus').onclick = function () { if (COINS < 5) { COINS++; $('cVal').textContent = COINS; if (picked.length === 5) analyze(); } };
+  $('cMin').onclick = function () { if (COINS > 1) { COINS--; saveCfg(); $('cVal').textContent = COINS; renderPayRp(); if (picked.length === 5) analyze(); } };
+  $('cPlus').onclick = function () { if (COINS < 5) { COINS++; saveCfg(); $('cVal').textContent = COINS; renderPayRp(); if (picked.length === 5) analyze(); } };
+
+  // ---------- nominal rupiah ----------
+  var NOMCHIPS = [1000, 5000, 10000, 100000];
+  function buildNomChips() {
+    var w = $('nomchips'); w.innerHTML = '';
+    NOMCHIPS.forEach(function (v) {
+      var b = document.createElement('button');
+      b.className = 'chip' + (v === NOMINAL ? ' on' : '');
+      b.textContent = fmtRp(v);
+      b.onclick = function () { setNominal(v); };
+      w.appendChild(b);
+    });
+  }
+  function setNominal(v) {
+    v = Math.max(100, Math.round(+v) || 1000);
+    NOMINAL = v; saveCfg();
+    $('nominal').value = v;
+    buildNomChips(); renderPayRp();
+    if (picked.length === 5) analyze();
+  }
+  $('nominal').addEventListener('change', function () { setNominal($('nominal').value); });
 
   // ---------- analysis ----------
   function analyze() {
@@ -126,22 +165,34 @@
     var hs = {}; res.hold.forEach(function (c) { hs[c] = 1; });
     var cards = dealt.map(function (c) { return bigCard(c, hs[c]); }).join('');
     var alts = res.alts.map(function (a) {
-      return '<div class="alt"><span>' + a.name + '</span><b>' + a.ev.toFixed(2) + '</b></div>';
+      return '<div class="alt"><span>' + a.name + '</span><b>' + fmtRp(a.ev * NOMINAL) + '</b></div>';
     }).join('');
+    var betRp = coins * NOMINAL, expRp = res.ev * NOMINAL;
     $('result').innerHTML =
       '<div class="reshead">✅ TAHAN: ' + res.name + '</div>' +
       '<div class="bcards">' + cards + '</div>' +
+      '<div class="exprp">💰 Ekspektasi kembali <b>' + fmtRp(expRp) + '</b><small>per ronde • bet ' + fmtRp(betRp) + '</small></div>' +
       '<div class="evrow"><div><small>EV / koin</small><b>' + res.ev.toFixed(2) + '</b></div>' +
       '<div><small>RTP</small><b>' + res.rtp.toFixed(2) + '%</b></div>' +
-      '<div><small>Bet</small><b>' + coins + ' koin</b></div></div>' +
+      '<div><small>Bet</small><b>' + fmtRp(betRp) + '</b></div></div>' +
       '<p class="why">' + E.advice(res, coins) + '</p>' +
-      '<div class="alts"><div class="altstitle">Alternatif lain (EV lebih kecil):</div>' + alts + '</div>' +
+      '<div class="alts"><div class="altstitle">Alternatif lain (ekspektasi lebih kecil):</div>' + alts + '</div>' +
       '<div class="logrow"><span>Hasil mainmu:</span> ' +
       '<button class="btn win" id="logW">✅ Bayar</button>' +
       '<button class="btn lose" id="logL">❌ Zonk</button></div>' +
       '<small class="ms">exact • paytable ' + pt + ' • ' + ms + ' ms</small>';
     $('logW').onclick = function () { log(1); };
     $('logL').onclick = function () { log(0); };
+  }
+
+  // ---------- bayaran dalam rupiah ----------
+  function renderPayRp() {
+    var el = $('payRp'); if (!el) return;
+    var pay = E.payouts(PT, COINS); // koin aktual utk bet ini
+    var rp = function (i) { return fmtRp(pay[i] * NOMINAL); };
+    el.innerHTML = 'Dengan bet-mu (<b>' + COINS + ' koin × ' + fmtRp(NOMINAL) + ' = ' + fmtRp(COINS * NOMINAL) + '</b>/ronde):<br>' +
+      '👑 Royal Flush: <b>' + rp(9) + '</b> • SF: <b>' + rp(8) + '</b> • Four of a Kind: <b>' + rp(7) + '</b><br>' +
+      'Full House: <b>' + rp(6) + '</b> • Flush: <b>' + rp(5) + '</b> • Straight: <b>' + rp(4) + '</b>';
   }
 
   // ---------- history ----------
@@ -173,5 +224,8 @@
       '</div><div class="dots">' + (last || '<span style="color:#5a6578;font-size:12px">Belum ada data.</span>') + '</div>';
   }
 
-  buildPicker(); buildChips(); refresh(); renderHist();
+  buildPicker(); buildChips(); buildNomChips();
+  $('cVal').textContent = COINS;
+  $('nominal').value = NOMINAL;
+  refresh(); renderHist(); renderPayRp();
 })();

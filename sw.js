@@ -1,4 +1,4 @@
-var CACHE = 'jacks-win-v1';
+var CACHE = 'jacks-win-v2';
 var ASSETS = ['./', './index.html', './app.js', './engine.js', './manifest.json',
   './icons/icon-192.png', './icons/icon-512.png'];
 self.addEventListener('install', function (e) {
